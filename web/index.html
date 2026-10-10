@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#090b15" />
-  <title>AI Video Studio • Create without subscriptions</title>
+  <title>AI Video Studio · Local Shorts Creator</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
@@ -12,51 +12,51 @@
     <aside class="sidebar">
       <a class="brand" href="/" aria-label="AI Video Studio home"><span class="brand-mark">✦</span><span>frame<span class="brand-light">forge</span><small>AI VIDEO STUDIO</small></span></a>
       <div class="side-heading">WORKSPACE</div>
-      <div class="side-link selected">✧ <span>Create video</span></div>
-      <div class="side-link muted">▦ <span>My creations</span><em>Coming soon</em></div>
-      <div class="sidebar-bottom">
-        <div class="info-icon">✦</div>
-        <strong>Built for creators.</strong>
-        <p>Run local motion for free. Connect your own GPU for Wan 2.2.</p>
-        <span class="pill">LOCAL-FIRST · OPEN SOURCE</span>
-      </div>
+      <div class="side-link selected">▤ <span>Storyboard editor</span></div>
+      <div class="sidebar-bottom"><div class="info-icon">✦</div><strong>Free and local first.</strong><p>Animate images with FFmpeg, or connect your own ComfyUI server for Wan scenes.</p><span class="pill">NO PAID API REQUIRED</span></div>
     </aside>
     <main class="main-content">
-      <header class="topbar"><div class="breadcrumb">Workspace <span>/</span> <strong>Create</strong></div><div class="status-line"><span class="dot" id="serverDot"></span><span id="serverStatus">Checking engine…</span></div></header>
+      <header class="topbar"><div class="breadcrumb">Workspace <span>/</span> <strong>Shorts creator</strong></div><div class="status-line"><span class="dot" id="serverDot"></span><span id="serverStatus">Checking local engine…</span></div></header>
       <div class="container">
-        <div class="page-heading"><div><div class="eyebrow">YOUR CREATIVE WORKSPACE</div><h1>Turn ideas into <span>motion.</span></h1><p>Build short-form videos with free local animation or your own AI generation server.</p></div><div class="version-tag">BETA 1.0</div></div>
+        <div class="page-heading"><div><div class="eyebrow">YOUR CREATIVE WORKSPACE</div><h1>Build a story in <span>scenes.</span></h1><p>Mix local image animation with Wan 2.2 clips, then render one MP4 for your channel.</p></div><div class="version-tag">PHASE 2</div></div>
         <div class="studio-grid">
-          <section class="panel controls">
-            <div class="panel-heading"><div class="step-circle">01</div><div><h2>Video engine</h2><p>Choose how your video will be created.</p></div></div>
-            <div class="mode-switch" role="group" aria-label="Generation engine"><button id="localButton" class="mode active" type="button"><span class="mode-icon">◉</span><span><strong>Local Motion</strong><small>Free • No GPU</small></span></button><button id="wanButton" class="mode" type="button"><span class="mode-icon">✧</span><span><strong>Wan 2.2 AI</strong><small>Needs GPU server</small></span></button></div>
-            <div class="section-title"><div class="step-circle">02</div><div><h2>Describe your scene</h2><p id="promptHelp">For local motion, your text becomes an animated title card unless you upload an image.</p></div></div>
-            <label for="prompt" class="field-label">YOUR PROMPT</label>
-            <textarea id="prompt" maxlength="1800" placeholder="A fluffy orange cat in a tiny business suit, sitting in a modern office…">A fluffy orange cat in a tiny business suit, sitting in a modern office.</textarea>
-            <div class="field-footer"><span id="promptCount">0 / 1800</span><span>✦ Your creative direction</span></div>
-            <label for="image" class="field-label">REFERENCE IMAGE <span class="optional">OPTIONAL</span></label>
-            <label class="dropzone" for="image"><span class="upload-icon">⇧</span><strong id="imageLabel">Click to upload an image</strong><small>PNG, JPG or WEBP · max 12 MB</small></label><input id="image" type="file" accept="image/png,image/jpeg,image/webp" hidden />
-            <div class="form-row">
-              <div class="field"><label for="orientation" class="field-label">ASPECT RATIO</label><select id="orientation"><option value="portrait">▯ Portrait 9:16</option><option value="landscape">▭ Landscape 16:9</option></select></div>
-              <div class="field"><label for="duration" class="field-label">DURATION</label><select id="duration"><option value="3">3 seconds</option><option value="4" selected>4 seconds</option><option value="6">6 seconds</option><option value="8">8 seconds</option><option value="10">10 seconds</option><option value="12">12 seconds</option></select></div>
+          <section class="panel editor-panel" aria-labelledby="storyboardHeading">
+            <div class="panel-heading"><div class="step-circle">01</div><div><h2 id="storyboardHeading">Project settings</h2><p>Choose the format and quality for the finished video.</p></div></div>
+            <div class="settings-grid">
+              <div class="field"><label for="orientation" class="field-label">ASPECT RATIO</label><select id="orientation"><option value="portrait">Portrait · 9:16 Shorts</option><option value="landscape">Landscape · 16:9</option></select></div>
+              <div class="field"><label for="resolution" class="field-label">RESOLUTION</label><select id="resolution"><option value="540">540p · faster</option><option value="720" selected>720p · balanced</option><option value="1080">1080p · larger file</option></select></div>
+              <div class="field"><label for="fps" class="field-label">FRAME RATE</label><select id="fps"><option value="16">16 FPS</option><option value="24" selected>24 FPS</option><option value="30">30 FPS</option><option value="60">60 FPS</option></select></div>
+              <div class="field"><label for="music" class="field-label">SOUNDTRACK <span class="optional">OPTIONAL</span></label><label for="music" class="file-choose"><span id="musicLabel">＋ Add MP3, WAV, or M4A</span></label><input id="music" type="file" accept="audio/mpeg,audio/wav,audio/mp4,.mp3,.wav,.m4a" hidden /></div>
             </div>
-            <div class="form-row" id="localOptions">
-              <div class="field"><label for="motion" class="field-label">CAMERA MOTION</label><select id="motion"><option value="zoom_in">↗ Zoom in</option><option value="zoom_out">↙ Zoom out</option><option value="pan_left">← Pan left</option><option value="pan_right">→ Pan right</option></select></div>
-              <div class="field"><label for="audio" class="field-label">MUSIC <span class="optional">OPTIONAL</span></label><label for="audio" class="file-choose"><span id="audioLabel">＋ Add audio</span></label><input id="audio" type="file" accept="audio/mpeg,audio/wav,audio/mp4,.mp3,.wav,.m4a" hidden /></div>
-            </div>
-            <div class="wan-note hidden" id="wanNote">⚡ Wan 2.2 runs on an external ComfyUI GPU. The app doesn't include a free GPU or paid video API. Configure <code>COMFYUI_URL</code> before using it.</div>
-            <button class="generate-button" id="generate" type="button"><span>✦</span> Generate video <span class="arrow">→</span></button>
+            <div class="section-title storyboard-title"><div class="step-circle">02</div><div><h2>Storyboard</h2><p>Set the engine and details for every scene.</p></div></div>
+            <div class="storyboard-meta"><span id="sceneSummary">1 scene · 4 seconds</span><span>Up to 20 scenes · 60 seconds</span></div>
+            <div id="sceneList" class="scene-list" aria-live="polite"></div>
+            <button class="add-scene-button" id="addScene" type="button">＋ Add scene</button>
+            <button class="generate-button" id="generate" type="button"><span>✦</span> Render video <span class="arrow">→</span></button>
             <div id="error" class="error hidden" role="alert"></div>
-            <p class="privacy-note">🔒 Uploaded files stay on your PC in local mode. Wan mode sends prompt/reference image to your configured ComfyUI server.</p>
+            <p class="privacy-note">Uploads stay on this PC for local scenes. Wan prompts and reference images go to the ComfyUI URL you configure below.</p>
           </section>
-          <section class="panel preview-panel">
-            <div class="preview-header"><div><h2>Live preview</h2><p>Your next creation will appear here.</p></div><span class="preview-indicator" id="previewStatus">● READY</span></div>
-            <div class="preview-stage" id="previewStage"><div class="empty-preview" id="emptyPreview"><div class="empty-orbit"><span>✦</span></div><h3>Imagine it. Make it.</h3><p>Your generated MP4 will show up here, ready to watch and download.</p></div><video id="video" controls playsinline class="hidden" preload="metadata"></video></div>
-            <div class="output-bottom"><div><div class="output-title" id="outputTitle">Waiting for your first creation</div><div class="output-subtitle" id="outputSubtitle">Choose an engine and click Generate video.</div></div><a id="download" class="download-button disabled" href="#" download aria-disabled="true">↓ <span>Download MP4</span></a></div>
-            <div class="progress-box hidden" id="progressBox"><div class="progress-heading"><span class="spinner"></span><strong id="progressText">Processing…</strong></div><div class="progress-track"><div class="progress-bar"></div></div><small>Large generative AI jobs can take a while depending on the GPU.</small></div>
-            <div class="tips"><div class="tip-icon">✧</div><div><strong>Want to make YouTube Shorts?</strong><p>Choose Portrait 9:16. For the free local mode, upload a still image, pick a motion style, and optionally add your own music.</p></div></div>
-          </section>
+
+          <div class="right-column">
+            <section class="panel preview-panel" aria-labelledby="previewHeading">
+              <div class="preview-header"><div><h2 id="previewHeading">Video preview</h2><p>Watch the combined MP4 when rendering finishes.</p></div><span class="preview-indicator" id="previewStatus">● READY</span></div>
+              <div class="preview-stage" id="previewStage"><div class="empty-preview" id="emptyPreview"><div class="empty-orbit"><span>✦</span></div><h3>Your story starts here.</h3><p>Add scenes, choose local motion or Wan 2.2, then render a preview.</p></div><video id="video" controls playsinline class="hidden" preload="metadata"></video></div>
+              <div class="output-bottom"><div><div class="output-title" id="outputTitle">Ready for your storyboard</div><div class="output-subtitle" id="outputSubtitle">Your final MP4 will appear here.</div></div><a id="download" class="download-button disabled" href="#" download aria-disabled="true">↓ <span>Download MP4</span></a></div>
+              <div class="progress-box hidden" id="progressBox"><div class="progress-heading"><span class="spinner"></span><strong id="progressText">Preparing scenes…</strong></div><div class="progress-track"><div class="progress-bar" id="progressBar"></div></div><small id="progressDetail">Scene status appears in the storyboard.</small></div>
+              <div class="tips"><div class="tip-icon">✦</div><div><strong>For YouTube Shorts</strong><p>Portrait 9:16 is selected by default. Local Motion animates a still image or creates a text card. Wan 2.2 requires your own configured ComfyUI server and compatible GPU setup.</p></div></div>
+            </section>
+
+            <section class="panel comfy-panel" aria-labelledby="comfyHeading">
+              <div class="panel-heading"><div class="step-circle">03</div><div><h2 id="comfyHeading">ComfyUI connection</h2><p>Settings are saved in this project's local .env file.</p></div></div>
+              <label for="comfyUrl" class="field-label">COMFYUI SERVER URL</label>
+              <input id="comfyUrl" class="text-input" type="url" inputmode="url" placeholder="http://127.0.0.1:8188" autocomplete="url" />
+              <div class="form-row comfy-actions"><div class="field"><label for="timeout" class="field-label">JOB TIMEOUT</label><select id="timeout"><option value="600">10 minutes</option><option value="1800">30 minutes</option><option value="2400" selected>40 minutes</option><option value="3600">60 minutes</option><option value="7200">120 minutes</option></select></div><div class="connection-actions"><button id="testComfy" class="secondary-button" type="button">Test connection</button><button id="saveComfy" class="secondary-button accent" type="button">Save settings</button></div></div>
+              <p class="comfy-status" id="comfyStatus" aria-live="polite">Connection checks do not run a model or verify GPU inference.</p>
+              <div class="wan-note">Wan 2.2 uses the workflow in <code>workflows/wan22_5b_api.json</code>. Health checks can confirm that ComfyUI responds and that the workflow file is valid; they do not prove that the model runs on a GPU.</div>
+            </section>
+          </div>
         </div>
-        <footer>AI Video Studio · Built with FastAPI, FFmpeg and Wan 2.2 <span>VERSION 1.0</span></footer>
+        <footer>AI Video Studio · FastAPI, Pillow, FFmpeg and optional ComfyUI <span>LOCAL-FIRST</span></footer>
       </div>
     </main>
   </div>
