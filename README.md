@@ -1,28 +1,39 @@
-# ✦ AI Video Studio (FrameForge) — Free-first MVP
+# AI Video Studio (FrameForge)
 
-A local-first video-making web app for Windows, built with **Python + FastAPI + FFmpeg** and an optional **Wan 2.2 / ComfyUI GPU connector**. No paid API key is required. A real GPU is still needed for generative AI video.
+A local-first YouTube Shorts creator built with Python, FastAPI, Pillow, and FFmpeg. Make scenes with local still-image animation, optionally mix in Wan 2.2 scenes from your own ComfyUI server, and render the storyboard to one MP4. No paid API is required.
 
-## What works
+## Features
 
-- ✅ **Local Motion**: Upload PNG/JPG/WEBP and render an MP4 with zoom-in, zoom-out, left or right pan; portrait 9:16 and landscape 16:9; 3–12 seconds; optional MP3/WAV/M4A soundtrack.
-- ✅ **Text-card mode**: If no image is uploaded, your prompt is rendered as a moving title card. **This is not an AI-generated scene.**
-- ✅ **Wan 2.2 / ComfyUI**: Submit text-to-video or image-to-video jobs to **your own configured ComfyUI GPU server**, poll progress, retrieve video and download it.
-- ✅ Local web UI, background jobs, upload limits, inline preview and MP4 download.
+- Create, edit, reorder, duplicate, and delete scenes in the storyboard.
+- Choose Local Motion or Wan 2.2 separately for each scene.
+- Add a prompt, an optional PNG/JPG/WEBP reference image, duration, camera motion, and optional text overlay to each scene.
+- Animate local images with zoom-in, zoom-out, pan-left, or pan-right. A local scene without an image becomes a moving text card; it is not AI image generation.
+- Set portrait 9:16 or landscape 16:9 output, 540p/720p/1080p resolution, and 12–60 FPS. Wan source clips are rendered through ComfyUI and then normalized to the selected project output settings.
+- Add an optional MP3/WAV/M4A soundtrack to the finished video.
+- Follow progress and errors per scene, preview the final video, and download its MP4.
+- Configure the ComfyUI URL and job timeout in the editor or in `.env`.
 
-### Not part of version 1
+### Limits
 
-Automatic image generation, speech generation, full 12-second AI-generated scenes, multi-clip timelines, persisted jobs, account system, GPU provisioning or unlimited cloud inference. Wan videos are 3–6 seconds with 16fps settings; frames may require substantial GPU time.
+- Up to 20 scenes and 60 seconds per project.
+- Local scenes: 1–12 seconds. Wan scenes: 3–6 seconds.
+- Reference images: 12 MB each; soundtrack: 16 MB; combined project uploads: 64 MB.
+- Prompt: 1,800 characters per scene. Overlay: 180 characters per scene.
+- Wan output files downloaded from ComfyUI are limited to 250 MB.
 
-## Installation on Windows
+Jobs and progress are kept in memory and reset when the server restarts. Finished MP4 files are kept in `outputs/`. Temporary project uploads are removed after each render.
 
-1. Install **Python 3.11 or newer** from https://www.python.org/downloads/ (enable **Add Python to PATH**).
-2. Extract the ZIP into your GitHub projects directory (for example `C:\Users\bilal\github\AI-Video-Studio`).
-3. Double-click **`setup.bat`**. This installs Python packages in an isolated `.venv`, including a bundled FFmpeg binary (no separate FFmpeg download normally needed).
-4. Double-click **`start.bat`**.
-5. Open **http://127.0.0.1:8000**.
-6. Choose **Local Motion**, upload an image, select a motion and duration, then click **Generate video**. Download the result as MP4.
+## Windows setup
 
-PowerShell alternative:
+1. Install Python 3.11 or later from [python.org](https://www.python.org/downloads/) and enable **Add Python to PATH**.
+2. Open this project folder in File Explorer.
+3. Double-click `setup.bat`. It creates `.venv`, installs the Python packages, and creates `.env` from `.env.example` if needed. `imageio-ffmpeg` supplies the FFmpeg executable used by the app, so a separate FFmpeg install is not normally needed.
+4. Double-click `start.bat`.
+5. Open [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+The server binds to `127.0.0.1` by default. Keep it local; this app does not have user accounts or authentication.
+
+### PowerShell setup
 
 ```powershell
 cd "$HOME\github\AI-Video-Studio"
@@ -32,76 +43,112 @@ Copy-Item .env.example .env
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-If `python` isn't available, install Python first. Windows antivirus/Windows SmartScreen may ask for confirmation when running locally-created batch files.
+If `py` is not available, install Python first or use `python` in its place. Do not run Uvicorn with `--host 0.0.0.0` on an untrusted network.
 
-## Connect Wan 2.2 when a GPU is available
+## FFmpeg
 
-This project **does not include a free cloud GPU**. Your existing ASUS integrated Radeon laptop graphics are not an appropriate target for running Wan 2.2 at reasonable speeds. Free cloud GPU services may be unavailable, restricted or have short quotas. A compatible ComfyUI server running on another GPU computer is the intended target.
+The normal setup uses the FFmpeg binary packaged by the `imageio-ffmpeg` Python dependency. The app falls back to `ffmpeg.exe` on `PATH` if that packaged binary is unavailable.
 
-1. On a GPU machine, install an up-to-date **ComfyUI**: https://github.com/Comfy-Org/ComfyUI
-2. In ComfyUI, load **Workflow → Browse Templates → Video → Wan 2.2 5B video generation** (or consult https://docs.comfy.org/tutorials/video/wan/wan2_2 ). Ensure `CreateVideo` and `SaveVideo` nodes are available.
-3. Install the three model files referenced in the official tutorial:
+To install a separate Windows FFmpeg build, use the Windows executable links on [FFmpeg's download page](https://www.ffmpeg.org/download.html) (currently linked builds include Gyan.dev and BtbN). Add the folder containing `ffmpeg.exe` to your user `PATH`, open a new terminal, and check:
 
+```powershell
+ffmpeg -version
+```
+
+Restart the app after changing `PATH`. The project uses CPU encoding with H.264; render time depends on image size, FPS, scene count, and your computer.
+
+## Configure ComfyUI and Wan 2.2
+
+Wan generation runs on a ComfyUI server that you provide. This application does not host a GPU, download model weights, or verify GPU inference. A successful health check only confirms that the server responds and the local API workflow passes structural validation.
+
+1. Install/update ComfyUI on the computer with your compatible GPU. Follow the current [official Wan 2.2 ComfyUI guide](https://docs.comfy.org/tutorials/video/wan/wan2_2).
+2. Manually download the Wan 2.2 TI2V 5B model files referenced by the official guide. The supplied workflow expects:
    - `ComfyUI/models/diffusion_models/wan2.2_ti2v_5B_fp16.safetensors`
    - `ComfyUI/models/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors`
    - `ComfyUI/models/vae/wan2.2_vae.safetensors`
+3. Start ComfyUI and make sure its server is reachable from this PC (the default ComfyUI port is `8188`). For a same-PC setup, use `http://127.0.0.1:8188`. For another machine, use its reachable LAN address and port.
+4. In AI Video Studio, enter the address under **ComfyUI connection**, select a timeout, click **Save settings**, then click **Test connection**. Settings are stored in the ignored local `.env` file. You can also edit:
 
-4. In `AI-Video-Studio/.env`, set `COMFYUI_URL=http://127.0.0.1:8188` for a same-PC ComfyUI or **the GPU machine's reachable address**. Only use an endpoint you trust. Do not expose an unauthenticated ComfyUI port to the public Internet.
-5. Restart `start.bat`, choose **Wan 2.2 AI**, enter a prompt, optionally upload a reference image and generate.
+   ```ini
+   COMFYUI_URL=http://127.0.0.1:8188
+   COMFYUI_TIMEOUT_SECONDS=2400
+   ```
 
-`workflows/wan22_5b_api.json` is a small **API-format** workflow based on the official ComfyUI 5B graph. It uses 448×800 portrait or 800×448 landscape (approximately 9:16/16:9; both divisible by 32), 16fps, a 20-step sampler, and SaveVideo (MP4 H.264). Actual success depends on ComfyUI version, required nodes, model files, available GPU memory and permissions; the supplied model workflow **has not been executed on a real GPU as part of this delivery**.
+5. Use the included `workflows/wan22_5b_api.json`. It is an API-format graph with the node IDs expected by this app. The app checks for required nodes before submission and polls the ComfyUI history endpoint until completion or timeout.
 
-If your ComfyUI's node options differ, export your working workflow **in API format** and adjust `workflows/wan22_5b_api.json`. The code expects node IDs `6` (positive prompt), `3` (seed), `55` (latent dimensions and optional start image), `56` (uploaded reference image), and `58` (SaveVideo). Visual ComfyUI workflow exports are **not** API-format workflows.
+The bundled workflow creates a 16 FPS source clip at its model dimensions. The final MP4 is resized/cropped to the storyboard's selected resolution, aspect ratio, and FPS. Wan scenes are limited to 3–6 seconds because that is the range configured for this workflow. A camera motion setting is sent as prompt guidance; the model may interpret it differently.
 
-**Remote-host notes:** Many free notebooks prohibit or block server port exposure. A remotely hosted ComfyUI server must be reachable from your computer; the app does not include a tunneling or proxy service. A GPU service may charge you even though this app is free.
+ComfyUI's official guide says the TI2V 5B workflow should fit well on 8 GB VRAM with ComfyUI native offloading, but actual performance and compatibility vary by GPU, drivers, ComfyUI version, and model setup. **This project's Wan inference has not been tested on a real GPU.**
 
-## Folder structure
+Do not expose an unauthenticated ComfyUI port to the public Internet. If you use a separate GPU host, only connect to a host you trust; Wan prompts and reference images are sent to that configured server.
 
-```text
-AI-Video-Studio/
-├── app/
-│   ├── __init__.py
-│   ├── main.py                 FastAPI API, job queue, file handling
-│   ├── animation.py            CPU-only FFmpeg animations
-│   └── comfy.py                Wan 2.2 / ComfyUI adapter
-├── web/
-│   ├── index.html              Responsive creator UI
-│   ├── styles.css              Dark interface
-│   └── app.js                  Upload, progress, video preview
-├── workflows/
-│   └── wan22_5b_api.json       ComfyUI API workflow
-├── tests/
-│   └── test_smoke.py           FastAPI + render tests
-├── outputs/                     Finished MP4 clips (not committed)
-├── uploads/                     Temporary media (cleared after each job)
-├── .env.example
-├── requirements.txt
-├── setup.bat
-└── start.bat
-```
+## Troubleshooting
 
-## Programmatic API
+### `FFmpeg not found`
 
-- `GET /api/health` — check service and ComfyUI connectivity
-- `POST /api/generate` — `multipart/form-data`: `mode` local/wan, `prompt`, `orientation`, `duration`, `motion`, optional `image` and `audio` (audio only for local)
-- `GET /api/jobs/{job_id}` — queued/running/complete/error and progress message
-- `GET /api/videos/{job_id}` — stream/download finished MP4
+- Run `setup.bat` again to install the Python dependencies.
+- In PowerShell, run `where.exe ffmpeg` and `ffmpeg -version` if you installed a system copy.
+- If the app still cannot locate FFmpeg, install a Windows build as described above, add its `bin` folder to `PATH`, then restart the server.
 
-Run tests (install `pytest`):
+### ComfyUI is not detected
+
+- Start ComfyUI and confirm its address in a browser on the same PC before testing it here.
+- Check the URL and port in the editor. The default is `http://127.0.0.1:8188`.
+- For another computer, check that both devices can reach each other and that the GPU host firewall allows the ComfyUI port on the trusted LAN.
+- Health checks do not run a workflow and do not confirm that a GPU is available.
+
+### Workflow validation or node errors
+
+- Update ComfyUI. The official Wan guide notes that missing nodes can mean that ComfyUI is out of date or failed to load nodes.
+- Confirm that the required model files are in the folders above and that the ComfyUI console has no model-loading errors.
+- If you replace `workflows/wan22_5b_api.json`, use an API-format workflow and preserve the required node IDs/types (`3` KSampler, `6` CLIPTextEncode, `55` Wan22ImageToVideoLatent, `57` CreateVideo, `58` SaveVideo). The app's workflow validator reports missing required nodes.
+- Read the ComfyUI console for the detailed node error after a failed job.
+
+### Wan rendering times out or returns no video
+
+- Increase **Job timeout** in the editor and save it.
+- Check ComfyUI's queue/history and server logs. Model loading or generation can take a long time.
+- Confirm that the workflow contains a SaveVideo node that writes an MP4. The app downloads the resulting video through ComfyUI's `/view` endpoint.
+- A health check that succeeds is not evidence that inference works. This project has not verified GPU inference end to end.
+
+### Upload rejected or render fails locally
+
+- Check the per-scene error and keep images/audio within the stated file limits.
+- Use a readable PNG, JPG, WEBP, MP3, WAV, or M4A file. The app checks image contents before saving them.
+- High resolutions, 60 FPS, long projects, and many scenes use more CPU time and disk space. Try 540p or fewer scenes if local rendering is slow.
+- Ensure the project has enough free disk space for temporary clips and the finished MP4.
+
+## API
+
+- `GET /api/health` — local service status, ComfyUI reachability, workflow validity, and `inference_tested: false`.
+- `GET /api/settings` and `POST /api/settings` — read or save the ComfyUI URL and timeout.
+- `POST /api/render` — multipart form with `project` (JSON string), repeated `reference_images` files, and optional `music` file. Each scene has `id`, `engine` (`local`/`wan`), `prompt`, `duration`, `motion`, `overlay`, and optional `image_index`.
+- `POST /api/generate` — compatible single-scene MVP endpoint (`mode`, `prompt`, `orientation`, `duration`, `motion`, optional `image` and `audio`).
+- `GET /api/jobs/{job_id}` — overall status and per-scene progress/error data.
+- `GET /api/videos/{job_id}` — stream/download the completed MP4.
+
+## Tests
+
+Install pytest into the project venv (it is a development-only dependency), then run the suite:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install pytest
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-## Practical usage / privacy
+The suite includes CPU FFmpeg renders and a mocked ComfyUI adapter. Mocked Wan tests do not test a real ComfyUI server or GPU inference.
 
-- Run only on `127.0.0.1` for your own computer. This MVP has no logins or rate limiting and is not production-secure for Internet-facing hosting.
-- Images/music uploaded in local mode are processed on your own computer; reference images/prompts for Wan are transmitted to the configured ComfyUI host.
-- Rendering uses CPU and may be slow on laptops. Do not close `start.bat` during a render.
-- Saved outputs live under `outputs/` and can be manually deleted; job statuses live in memory and reset on server restart.
-- You are responsible for rights to uploaded images and music, and for any costs of GPU services you choose.
+## Project layout
 
-## Next releases
-
-V2: Storyboard of multiple clips, smooth transitions and custom sound library. V3: image-generation plugin, voiceover/TTS, subtitles and reusable templates. V4: optional user accounts and persistent jobs if needed.
+```text
+app/main.py                 FastAPI endpoints, settings, uploads, and render jobs
+app/animation.py            Pillow cards and FFmpeg scene/video processing
+app/comfy.py                ComfyUI Wan 2.2 workflow, polling, and retrieval
+web/index.html              Storyboard editor and output preview
+web/app.js                  Scene controls, upload handling, progress, and settings
+web/styles.css              Responsive editor styles
+workflows/wan22_5b_api.json ComfyUI API-format workflow
+tests/test_smoke.py         API, CPU rendering, validation, and mocked adapter tests
+outputs/                    Finished MP4s (not committed)
+uploads/                    Temporary render files (not committed)
+```
